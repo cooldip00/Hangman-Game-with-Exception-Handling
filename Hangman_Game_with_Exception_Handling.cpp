@@ -1,8 +1,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 #include <cstdlib>
 #include <ctime>
+#include <cctype>
+#include <limits>  
 
 using namespace std;
 
@@ -37,6 +40,7 @@ void displayWord(const string& word, const vector<bool>& guessed) {
 
 void playHangman(const string& word) {
     vector<bool> guessed(word.length(), false);
+    set<char> guessedLetters;
     int remainingGuesses = 6;
     char guess;
     bool wordGuessed = false;
@@ -50,11 +54,20 @@ void playHangman(const string& word) {
         cin >> guess;
 
         try {
-            if (!isValidInput(guess)) {
+            if (!isValidInput(guess) || cin.fail()) {
+                cin.clear(); // Clear error state
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard input
                 throw InvalidInputException();
             }
 
             guess = tolower(guess);
+
+            if (guessedLetters.find(guess) != guessedLetters.end()) {
+                cout << "You have already guessed that letter!" << endl;
+                continue;
+            }
+
+            guessedLetters.insert(guess);
             bool correctGuess = false;
 
             for (size_t i = 0; i < word.length(); ++i) {
@@ -86,7 +99,7 @@ void playHangman(const string& word) {
     if (wordGuessed) {
         cout << "Congratulations! You guessed the word: " << word << endl;
     } else {
-        cout << "Sorry, you ran out of guesses. The word was: " << word << endl;
+        cout << "You are Dead. The word was: " << word << endl;
     }
 }
 
